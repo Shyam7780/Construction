@@ -25,5 +25,6 @@ dist-ssr
 .vite-source-tags.js
 .vercel
 node_modules/.env
+.env
 
 
