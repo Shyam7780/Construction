@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 // Models को इम्पोर्ट करना
-const Project = require('./models/Project');
+const project = require('./models/Project');
 const Admin = require('./models/Admin');
 
 const app = express();
