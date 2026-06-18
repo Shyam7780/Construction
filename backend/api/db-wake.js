@@ -1,15 +1,20 @@
-const PROJECT_REF = process.env.FULLSTACK_PROJECT_REF || '';
-const RESTORE_URL = process.env.FULLSTACK_RESTORE_API_URL || '';
+import mongoose from 'mongoose';
 
-let _restoreTriggered = false;
+// अब हम किसी API URL को कॉल करने के बजाय, सीधे MongoDB कनेक्शन को 'वेक' (चेक) करेंगे
+let _wakeTriggered = false;
 
-export function triggerRestore() {
-  if (_restoreTriggered || !PROJECT_REF || !RESTORE_URL) return;
-  _restoreTriggered = true;
-  fetch(RESTORE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ project_ref: PROJECT_REF }),
-  }).catch(() => {});
-  setTimeout(() => { _restoreTriggered = false; }, 60000);
+export function triggerWake() {
+  // अगर कनेक्शन पहले से ही रेडी है, तो कुछ न करें
+  if (_wakeTriggered || mongoose.connections[0].readyState === 1) return;
+  
+  _wakeTriggered = true;
+  console.log("Waking up MongoDB connection...");
+  
+  // कनेक्शन को फिर से जोड़ने की कोशिश करें
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log("MongoDB woken up!"))
+    .catch((err) => console.error("Wake-up failed:", err));
+
+  // 60 सेकंड का कूलडाउन ताकि बार-बार रिक्वेस्ट न जाए
+  setTimeout(() => { _wakeTriggered = false; }, 60000);
 }
